@@ -123,15 +123,6 @@ int set_sock_ttl(int fd, int ttl)
     return res;
 }
 
-int set_sock_sack(int fd, int enable)
-{
-#if defined(__linux__)
-    return setsockopt(fd, IPPROTO_TCP, TCP_SACK, &enable, sizeof(enable));
-#else
-    return -1; // Not supported on this platform
-#endif
-}
-
 int set_sock_dontfrag(int fd, int enable)
 {
 #if defined(__APPLE__) || defined(__MACH__)
@@ -144,9 +135,9 @@ int set_sock_dontfrag(int fd, int enable)
 int set_sock_timestamps(int fd, int enable)
 {
 #if defined(__linux__)
-    return setsockopt(fd, IPPROTO_TCP, TCP_TIMESTAMP, &enable, sizeof(val));
+    return setsockopt(fd, IPPROTO_TCP, TCP_TIMESTAMP, &enable, sizeof(enable));
 #elif defined(__APPLE__) || defined(__MACH__)
-    return setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(val));
+    return setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(enable));
 #else
     return -1; // Not supported on this platform
 #endif
@@ -155,11 +146,6 @@ int set_sock_timestamps(int fd, int enable)
 int set_sock_mss(int fd, int mss_value)
 {
     return setsockopt(fd, IPPROTO_TCP, TCP_MAXSEG, &mss_value, sizeof(mss_value));
-}
-
-int set_sock_ecn(int fd, int enable)
-{
-    return setsockopt(fd, IPPROTO_TCP, TCP_ECN, &enable, sizeof(enable));
 }
 
 
@@ -172,6 +158,11 @@ int set_sock_sndbufforce(int fd, int size)
 int set_sock_rcvbufforce(int fd, int size)
 {
     return setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, &size, sizeof(size));
+}
+
+int set_tcp_clamp(int fd, int size)
+{
+    return setsockopt(fd, IPPROTO_TCP, TCP_WINDOW_CLAMP, &size, sizeof(size));
 }
 
 
