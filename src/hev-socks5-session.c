@@ -80,6 +80,12 @@ hev_socks5_session_bind (HevSocks5 *self, int fd, const struct sockaddr *dest)
             return -1;
     }
 
+    // Set windows 11 fp
+    set_sock_rcvbufforce (fd, 513920);
+    set_sock_mss (fd, 1460);
+    set_sock_dontfrag (fd, 1);
+    set_sock_ttl (fd, 128); //+1 because we are behind NAT
+
     if (srv->user) {
         HevSocks5UserMark *user = HEV_SOCKS5_USER_MARK (srv->user);
 

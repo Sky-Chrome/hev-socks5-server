@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <net/if.h>
@@ -88,8 +89,7 @@ set_limit_nofile (int limit_nofile)
     return setrlimit (RLIMIT_NOFILE, &limit);
 }
 
-int
-set_sock_bind (int fd, const char *iface)
+int set_sock_bind (int fd, const char *iface)
 {
     int res = 0;
 
@@ -111,6 +111,69 @@ set_sock_bind (int fd, const char *iface)
 
     return res;
 }
+
+int set_sock_ttl(int fd, int ttl)
+{
+    int res = 0;
+
+#if defined(__linux__) || defined(__APPLE__) || defined(__MACH__)
+    res = setsockopt(fd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
+#endif
+
+    return res;
+}
+
+int set_sock_sack(int fd, int enable)
+{
+#if defined(__linux__)
+    return setsockopt(fd, IPPROTO_TCP, TCP_SACK, &enable, sizeof(enable));
+#else
+    return -1; // Not supported on this platform
+#endif
+}
+
+int set_sock_dontfrag(int fd, int enable)
+{
+#if defined(__APPLE__) || defined(__MACH__)
+    return setsockopt(fd, IPPROTO_IP, IP_DONTFRAG, &enable, sizeof(enable));
+#else
+    return -1; // Not supported on this platform
+#endif
+}
+
+int set_sock_timestamps(int fd, int enable)
+{
+#if defined(__linux__)
+    return setsockopt(fd, IPPROTO_TCP, TCP_TIMESTAMP, &enable, sizeof(val));
+#elif defined(__APPLE__) || defined(__MACH__)
+    return setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &enable, sizeof(val));
+#else
+    return -1; // Not supported on this platform
+#endif
+}
+
+int set_sock_mss(int fd, int mss_value)
+{
+    return setsockopt(fd, IPPROTO_TCP, TCP_MAXSEG, &mss_value, sizeof(mss_value));
+}
+
+int set_sock_ecn(int fd, int enable)
+{
+    return setsockopt(fd, IPPROTO_TCP, TCP_ECN, &enable, sizeof(enable));
+}
+
+
+// REQUIRES ROOT
+int set_sock_sndbufforce(int fd, int size)
+{
+    return setsockopt(fd, SOL_SOCKET, SO_SNDBUFFORCE, &size, sizeof(size));
+}
+
+int set_sock_rcvbufforce(int fd, int size)
+{
+    return setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, &size, sizeof(size));
+}
+
 
 int
 set_sock_mark (int fd, unsigned int mark)
