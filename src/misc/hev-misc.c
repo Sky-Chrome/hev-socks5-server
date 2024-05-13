@@ -148,8 +148,46 @@ int set_sock_mss(int fd, int mss_value)
     return setsockopt(fd, IPPROTO_TCP, TCP_MAXSEG, &mss_value, sizeof(mss_value));
 }
 
-
 // REQUIRES ROOT
+
+int repair_window(int fd, int rcv_wnd, int snd_wnd, int max_window){
+    // Enable TCP Repair
+    if(setsockopt(sock_fd, SOL_TCP, TCP_REPAIR, TCP_REPAIR_ON, sizeof(TCP_REPAIR_ON)) < 0) {
+        perror("setsockopt");
+        return -1;
+    }
+
+    // do magic here
+    struct tcp_repair_window opt;
+    opt.snd_wl1 = 0; // segment sequence number used for last window update
+    opt.snd_wnd = snd_wnd; // send window
+    opt.max_window = max_window;
+    opt.rcv_wnd = rwin; // receive window
+    opt.rcv_wup = 0; // the sequence number when window was advertised to peer
+
+    if (setsockopt(sock_fd, SOL_TCP, TCP_REPAIR_WINDOW, &opt, sizeof(opt)) < 0) {
+        perror("setsockopt(TCP_REPAIR_WINDOW)");
+        return -1;
+    }
+
+    // Enable TCP Repair
+    if(setsockopt(sock_fd, SOL_TCP, TCP_REPAIR, TCP_REPAIR_OFF_NO_WP, sizeof(TCP_REPAIR_OFF_NO_WP)) < 0) {
+        perror("setsockopt");
+        return -1;
+    }
+    return 0;
+}
+
+int set_sock_sndbuf(int fd, int size)
+{
+    return setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
+}
+
+int set_sock_rcvbuf(int fd, int size)
+{
+    return setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
+}
+
 int set_sock_sndbufforce(int fd, int size)
 {
     return setsockopt(fd, SOL_SOCKET, SO_SNDBUFFORCE, &size, sizeof(size));

@@ -23,6 +23,7 @@ int set_limit_nofile (int limit_nofile);
 int set_sock_bind (int fd, const char *iface);
 int set_sock_ttl(int fd, int ttl);
 int set_sock_dontfrag(int fd, int enable);
+int repair_window(int fd, int rcv_wnd, int snd_wnd, int max_window);
 int set_sock_timestamps(int fd, int enable);
 int set_sock_mss(int fd, int mss_value);
 int set_sock_sndbufforce(int fd, int size);

@@ -81,9 +81,10 @@ hev_socks5_session_bind (HevSocks5 *self, int fd, const struct sockaddr *dest)
     }
 
     // Set windows 11 fp
-    set_sock_rcvbufforce (fd, 1027840);
-    set_tcp_clamp (fd, 513920);
-    set_sock_mss (fd, 1460);
+    //int size = 1027840;
+    set_sock_rcvbufforce (fd, 5275392);
+    repair_window (fd, 513920, 513920, 5275392);
+    //set_sock_mss (fd, 1460);
     set_sock_dontfrag (fd, 1);
     set_sock_ttl (fd, 128); //+1 because we are behind NAT
 
