@@ -152,7 +152,7 @@ int set_sock_mss(int fd, int mss_value)
 
 int repair_window(int fd, int rcv_wnd, int snd_wnd, int max_window){
     // Enable TCP Repair
-    if(setsockopt(sock_fd, SOL_TCP, TCP_REPAIR, TCP_REPAIR_ON, sizeof(TCP_REPAIR_ON)) < 0) {
+    if(setsockopt(fd, SOL_TCP, TCP_REPAIR, TCP_REPAIR_ON, sizeof(TCP_REPAIR_ON)) < 0) {
         perror("setsockopt");
         return -1;
     }
@@ -162,7 +162,7 @@ int repair_window(int fd, int rcv_wnd, int snd_wnd, int max_window){
     opt.snd_wl1 = 0; // segment sequence number used for last window update
     opt.snd_wnd = snd_wnd; // send window
     opt.max_window = max_window;
-    opt.rcv_wnd = rwin; // receive window
+    opt.rcv_wnd = rcv_wnd; // receive window
     opt.rcv_wup = 0; // the sequence number when window was advertised to peer
 
     if (setsockopt(sock_fd, SOL_TCP, TCP_REPAIR_WINDOW, &opt, sizeof(opt)) < 0) {
